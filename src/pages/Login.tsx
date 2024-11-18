@@ -8,20 +8,21 @@ import { useState } from "react";
 export function Login() {
     const navigate = useNavigate();
     const [register, setRegister] = useState(false);
-    async function login(email: string, password: string) {
-        await account.createEmailPasswordSession(email, password);
-    }
 
     const form = useForm({
         mode: 'controlled',
         initialValues: {
+            name: '',
             email: '',
             password: '',
+            confirmPassword: '',
         },
 
         validate: {
+            name: (value) => (value.length > 0 ? null : 'Name is required'),
             email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
             password: (value) => (value.length >= 8 ? null : 'Password is too short'),
+            confirmPassword: (value, values) => (value === values.password ? null : 'Passwords do not match'),
         }
     })
     return(
@@ -29,10 +30,15 @@ export function Login() {
             <Navbar/>
             <Center>
                 <Card>
-                    <form onSubmit={form.onSubmit(async (values) =>{ 
-                        console.log("Login sent")
+                    <form onSubmit={form.onSubmit(async (values) =>{
                         try{
-                            await login(values.email, values.password);
+                            console.log("Hello");
+                            if(!register){
+                                await account.createEmailPasswordSession(values.email, values.password);
+                            }else{
+                                await account.create(ID.unique(), values.email, values.password, values.name);
+                                await account.createEmailPasswordSession(values.email, values.password);
+                            }
                             form.reset();
                             navigate(-1);
                         }catch (e){
@@ -41,6 +47,7 @@ export function Login() {
                         
                         })}>
                         <Stack>
+                            {register? <TextInput {...form.getInputProps('name')} withAsterisk required placeholder="Your name" id="name"/> : null}
                             <TextInput 
                                 {...form.getInputProps('email')}
                                 withAsterisk 
@@ -49,8 +56,8 @@ export function Login() {
                                 id="email"
                             />
                             <PasswordInput {...form.getInputProps('password')} placeholder="Your password" id="password" />
-                            {register? <PasswordInput placeholder="Confirm password" id="confirmPassword"/> : null}
-                            <UnstyledButton onClick={() => setRegister((value)=> !value)}>
+                            {register? <PasswordInput {...form.getInputProps('confirmPassword')} placeholder="Confirm password" id="confirmPassword"/> : null}
+                            <UnstyledButton onClick={() => {setRegister((value)=> !value); form.reset()}}>
                                 {register? "Login" : "Register"}
                             </UnstyledButton>
                             <Button type="submit" mt="sm">
