@@ -32,7 +32,6 @@ export function Login() {
                 <Card>
                     <form onSubmit={form.onSubmit(async (values) =>{
                         try{
-                            console.log("Hello");
                             if(!register){
                                 await account.createEmailPasswordSession(values.email, values.password);
                             }else{
