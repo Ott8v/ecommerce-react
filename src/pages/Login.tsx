@@ -1,11 +1,13 @@
 import { useForm } from "@mantine/form"
 import { Navbar } from "../components"
-import {Button, Card, Center, PasswordInput, Stack, TextInput } from "@mantine/core"
+import {Button, Card, Center, PasswordInput, Stack, TextInput, UnstyledButton } from "@mantine/core"
 import { useNavigate } from "react-router-dom"
 import { account, ID } from '../lib';
+import { useState } from "react";
 
 export function Login() {
     const navigate = useNavigate();
+    const [register, setRegister] = useState(false);
     async function login(email: string, password: string) {
         await account.createEmailPasswordSession(email, password);
     }
@@ -47,8 +49,12 @@ export function Login() {
                                 id="email"
                             />
                             <PasswordInput {...form.getInputProps('password')} placeholder="Your password" id="password" />
+                            {register? <PasswordInput placeholder="Confirm password" id="confirmPassword"/> : null}
+                            <UnstyledButton onClick={() => setRegister((value)=> !value)}>
+                                {register? "Login" : "Register"}
+                            </UnstyledButton>
                             <Button type="submit" mt="sm">
-                                Log in
+                            {register? "Register" : "Log in"}
                             </Button>
                         </Stack>
                     </form>
